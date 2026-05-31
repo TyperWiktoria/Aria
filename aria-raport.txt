@@ -1,0 +1,20 @@
+RAPORT: ARIA APG W FORMULARZU
+
+Zastosowane wzorce
+W formularzu rejestracji na szkolenie UX zaimplementowano sześć wzorców ARIA APG: Landmark Regions (banner, main, navigation, contentinfo), Dialog Modal z pełnym focus trap i obsługą Escape, Alert Pattern na komunikatach błędów, Tooltip z obsługą klawiatury, Radio Group przez fieldset/legend oraz Live Regions dla licznika znaków i statusów. Uzupełnieniem są fundamenty APG: jawne label[for] na każdym polu, aria-required, aria-invalid, aria-describedby łączące hint i błąd, skip link, focus-visible, aria-hidden na ikonach dekoracyjnych oraz prefers-reduced-motion.
+
+Największe problemy
+Najtrudniejszy był focus trap w dialogu — querySelectorAll nie filtruje elementów ukrytych przez CSS, więc pętla Tab może utknąć na niewidocznym elemencie. Rozwiązanie: własny filtr z !el.disabled. Produkcyjna alternatywa to biblioteka focus-trap lub natywny element HTML <dialog>, który robi to automatycznie.
+Poważnym problemem okazało się zarządzanie fokusem po akcjach — nagłówek potwierdzenia ani żaden div nie przyjmuje focus() bez tabindex="-1". Dodanie tabindex="0" byłoby błędem (element trafia do kolejki Tab użytkownika), więc właściwe rozwiązanie to tabindex="-1" wszędzie tam, gdzie fokus jest przenoszony tylko przez JavaScript.
+Nieoczywiste było też timing live regions — region aria-live musi istnieć w DOM już przy ładowaniu strony, nie można go dodawać dynamicznie. Dodatkowo role="alert" przy polu i aria-live="assertive" na globalnym banerze mogą powodować podwójne odczytanie tego samego błędu, co dezorientuje użytkownika.
+Przy walidacji — kiedy pokazywać błędy — każde podejście ma wadę: tylko na submit frustruje klawiaturowców, na input jest zbyt agresywne dla pola email. Zastosowano model hybrydowy: walidacja na blur, ale powtarzana na żywo tylko jeśli pole już miało błąd.
+
+Wpływ na komfort użytkowania
+Dla użytkowników screen reader (NVDA, JAWS, VoiceOver) różnica jest krytyczna — bez ARIA pola nie mają nazw, błędy nie są ogłaszane, dialog jest nierozróżnialny od zwykłego div. Z ARIA każde pole jest przedstawione z etykietą, wymagalnością i opisem; błędy odczytywane natychmiast. Dla użytkowników klawiatury bez niepełnosprawności poprawa też jest istotna: skip link, widoczny fokus i działający Escape w modalu to elementy, których brak jest odczuwalny nawet przy codziennym użyciu.
+
+Na co zwracać uwagę
+Trzy rzeczy są absolutnie krytyczne i często pomijane. Po pierwsze — nigdy outline:none globalnie, zawsze focus-visible z własnym stylem. Po drugie — dialog bez focus trap blokuje dostęp do całej strony użytkownikowi klawiatury. Po trzecie — zły ARIA jest gorszy niż brak ARIA: aria-hidden="true" na interaktywnym przycisku usuwa go całkowicie z drzewa dostępności.
+Automatyczne narzędzia (axe, Lighthouse) wykrywają około 30% problemów. Reszta wychodzi tylko przy manualnym teście z realnym screen readerem — NVDA + Firefox na Windows, VoiceOver + Safari na macOS/iOS.
+
+Wniosek
+Minimalny zestaw dający 80% efektu: jawne label[for] na każdym polu, focus-visible zamiast outline:none, aria-invalid z komunikatem przez aria-describedby, skip link. Cztery zmiany, niewielki nakład, największy wpływ na dostępność.
