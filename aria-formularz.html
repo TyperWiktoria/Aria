@@ -1,0 +1,1836 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Formularz zgłoszeniowy — ARIA APG</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,700;1,9..40,300&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════
+   ZMIENNE SYSTEMU PROJEKTOWEGO
+═══════════════════════════════════════════ */
+:root {
+  --ink:        #0f1923;
+  --ink-mid:    #3d4f5c;
+  --ink-dim:    #6b7d8a;
+  --paper:      #f7f4ef;
+  --surface:    #ffffff;
+  --line:       rgba(15,25,35,0.10);
+  --line-focus: #1a6aff;
+  --accent:     #1a6aff;
+  --accent-d:   #0f4fcc;
+  --success:    #1a7a4a;
+  --success-bg: #edf7f2;
+  --error:      #b83232;
+  --error-bg:   #fdf2f2;
+  --warn-bg:    #fff8ed;
+  --warn:       #a05a00;
+  --radius-sm:  4px;
+  --radius:     8px;
+  --radius-lg:  14px;
+  --shadow-sm:  0 1px 2px rgba(0,0,0,0.05);
+  --shadow:     0 2px 8px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-lg:  0 8px 32px rgba(0,0,0,0.10), 0 2px 8px rgba(0,0,0,0.06);
+  --transition: 160ms ease;
+}
+
+/* ═══════════════════════════════════════════
+   RESET + BAZA
+═══════════════════════════════════════════ */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--ink);
+  background: var(--paper);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ═══════════════════════════════════════════
+   DOSTĘPNOŚĆ RUCHU (APG: prefers-reduced-motion)
+═══════════════════════════════════════════ */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ═══════════════════════════════════════════
+   SKIP LINK (APG: Keyboard Navigation)
+═══════════════════════════════════════════ */
+.skip-link {
+  position: absolute;
+  top: -100%;
+  left: 1rem;
+  z-index: 9999;
+  padding: .6rem 1.2rem;
+  background: var(--accent);
+  color: #fff;
+  font-weight: 700;
+  font-size: .9rem;
+  border-radius: 0 0 var(--radius) var(--radius);
+  text-decoration: none;
+  transition: top var(--transition);
+  /* APG: skip link musi być pierwszym fokusowanym elementem */
+}
+.skip-link:focus {
+  top: 0;
+  outline: 3px solid #fff;
+  outline-offset: 2px;
+}
+
+/* ═══════════════════════════════════════════
+   HEADER / NAWIGACJA
+═══════════════════════════════════════════ */
+.site-header {
+  background: var(--surface);
+  border-bottom: 1px solid var(--line);
+  padding: 1rem 2rem;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.header-inner {
+  max-width: 860px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.logo {
+  font-family: 'DM Serif Display', serif;
+  font-size: 1.3rem;
+  color: var(--ink);
+  text-decoration: none;
+  letter-spacing: -.02em;
+}
+.logo strong { color: var(--accent); }
+
+/* Nawigacja — APG: aria-current, focus-visible */
+.site-nav { display: flex; gap: .25rem; }
+.site-nav a {
+  font-size: .85rem;
+  font-weight: 500;
+  color: var(--ink-mid);
+  text-decoration: none;
+  padding: .4rem .8rem;
+  border-radius: var(--radius-sm);
+  transition: background var(--transition), color var(--transition);
+}
+.site-nav a:hover { background: var(--paper); color: var(--ink); }
+.site-nav a[aria-current="page"] {
+  background: rgba(26,106,255,0.08);
+  color: var(--accent);
+  font-weight: 700;
+}
+/* APG: focus-visible (nie outline:none!) */
+.site-nav a:focus-visible {
+  outline: 3px solid var(--line-focus);
+  outline-offset: 2px;
+}
+
+/* ═══════════════════════════════════════════
+   LAYOUT GŁÓWNY
+═══════════════════════════════════════════ */
+main {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 3rem 2rem 6rem;
+}
+
+/* Nagłówek strony */
+.page-intro {
+  margin-bottom: 2.5rem;
+  max-width: 600px;
+}
+.page-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  font-size: .72rem;
+  font-weight: 700;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: .75rem;
+}
+.page-eyebrow::before {
+  content: '';
+  display: block;
+  width: 20px;
+  height: 2px;
+  background: var(--accent);
+  border-radius: 1px;
+}
+.page-intro h1 {
+  font-family: 'DM Serif Display', serif;
+  font-size: clamp(1.8rem, 3.5vw, 2.6rem);
+  line-height: 1.15;
+  color: var(--ink);
+  letter-spacing: -.03em;
+  margin-bottom: .75rem;
+}
+.page-intro p {
+  font-size: 1rem;
+  color: var(--ink-mid);
+  line-height: 1.7;
+}
+
+/* ═══════════════════════════════════════════
+   WSKAŹNIK POSTĘPU (APG: aria-current="step")
+═══════════════════════════════════════════ */
+.progress-nav {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  margin-bottom: 2.5rem;
+  /* APG: role="list" dla kroków procesu */
+}
+.progress-step {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  font-size: .82rem;
+  font-weight: 500;
+  color: var(--ink-dim);
+  padding: .5rem .9rem;
+  border-radius: var(--radius);
+  transition: background var(--transition);
+  position: relative;
+}
+.progress-step .step-num {
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  background: var(--line);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: .72rem;
+  font-weight: 700;
+  flex-shrink: 0;
+  transition: background var(--transition), color var(--transition);
+}
+.progress-step[aria-current="step"] {
+  color: var(--ink);
+  font-weight: 700;
+}
+.progress-step[aria-current="step"] .step-num {
+  background: var(--accent);
+  color: #fff;
+}
+.progress-step[data-done="true"] { color: var(--success); }
+.progress-step[data-done="true"] .step-num {
+  background: var(--success);
+  color: #fff;
+}
+.progress-sep {
+  width: 28px;
+  height: 1px;
+  background: var(--line);
+  flex-shrink: 0;
+}
+
+/* ═══════════════════════════════════════════
+   KARTA FORMULARZA
+═══════════════════════════════════════════ */
+.form-card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+}
+.form-card-header {
+  padding: 1.6rem 2rem 1.2rem;
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+.form-card-header h2 {
+  font-family: 'DM Serif Display', serif;
+  font-size: 1.3rem;
+  letter-spacing: -.02em;
+  color: var(--ink);
+}
+.required-legend {
+  font-size: .78rem;
+  color: var(--ink-dim);
+  display: flex;
+  align-items: center;
+  gap: .35rem;
+}
+.req-marker {
+  color: var(--error);
+  font-weight: 700;
+  font-size: .9rem;
+  aria-hidden: "true";
+}
+
+/* ═══════════════════════════════════════════
+   SEKCJE FORMULARZA
+═══════════════════════════════════════════ */
+.form-body { padding: 1.8rem 2rem; display: flex; flex-direction: column; gap: 1.8rem; }
+
+.form-section { display: flex; flex-direction: column; gap: 1.2rem; }
+.form-section-label {
+  font-size: .68rem;
+  font-weight: 700;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+  padding-bottom: .5rem;
+  border-bottom: 1px solid var(--line);
+}
+
+/* ═══════════════════════════════════════════
+   POLA FORMULARZA (APG: Accessible Name + Description)
+═══════════════════════════════════════════ */
+.field { display: flex; flex-direction: column; gap: .35rem; }
+
+/* Etykieta — zawsze widoczna, nigdy placeholder-only */
+.field > label,
+.field > .field-label {
+  font-size: .88rem;
+  font-weight: 700;
+  color: var(--ink);
+  display: flex;
+  align-items: center;
+  gap: .3rem;
+}
+.field > label .req,
+.field > .field-label .req {
+  color: var(--error);
+  font-weight: 700;
+  /* APG: aria-label="wymagane" na ikonie gwiazdki */
+}
+
+/* Opis pomocniczy — powiązany aria-describedby */
+.field-desc {
+  font-size: .8rem;
+  color: var(--ink-dim);
+  line-height: 1.5;
+}
+
+/* Input / select / textarea */
+.field input[type="text"],
+.field input[type="email"],
+.field input[type="tel"],
+.field input[type="date"],
+.field select,
+.field textarea {
+  font-family: 'DM Sans', sans-serif;
+  font-size: .95rem;
+  color: var(--ink);
+  background: var(--paper);
+  border: 1.5px solid var(--line);
+  border-radius: var(--radius);
+  padding: .65rem .9rem;
+  width: 100%;
+  line-height: 1.5;
+  transition: border-color var(--transition), box-shadow var(--transition), background var(--transition);
+  /* APG: visible focus indicator, min 3:1 contrast z tłem */
+}
+.field input:hover,
+.field select:hover,
+.field textarea:hover {
+  border-color: rgba(15,25,35,0.25);
+}
+.field input:focus,
+.field select:focus,
+.field textarea:focus {
+  outline: none;
+  border-color: var(--line-focus);
+  box-shadow: 0 0 0 3px rgba(26,106,255,0.16);
+  background: var(--surface);
+}
+/* APG: focus-visible osobno (klawiatura vs mysz) */
+.field input:focus-visible,
+.field select:focus-visible,
+.field textarea:focus-visible {
+  outline: 3px solid var(--line-focus);
+  outline-offset: 0;
+  box-shadow: 0 0 0 5px rgba(26,106,255,0.12);
+}
+.field textarea { resize: vertical; min-height: 110px; }
+
+/* Stan błędu — APG: aria-invalid="true" + aria-describedby do komunikatu */
+.field.is-error input,
+.field.is-error select,
+.field.is-error textarea {
+  border-color: var(--error);
+  background: var(--error-bg);
+}
+.field.is-error input:focus,
+.field.is-error select:focus,
+.field.is-error textarea:focus {
+  box-shadow: 0 0 0 3px rgba(184,50,50,0.15);
+  border-color: var(--error);
+}
+
+/* Stan sukcesu */
+.field.is-valid input,
+.field.is-valid select {
+  border-color: var(--success);
+  background: var(--success-bg);
+}
+
+/* Komunikat błędu — APG: role="alert", powiązany id */
+.field-error-msg {
+  display: flex;
+  align-items: flex-start;
+  gap: .4rem;
+  font-size: .82rem;
+  color: var(--error);
+  font-weight: 600;
+  line-height: 1.4;
+  /* APG: rola alert dla dynamicznie dodawanych komunikatów */
+}
+.field-error-msg svg { flex-shrink: 0; margin-top: 1px; }
+
+/* Licznik znaków */
+.char-count {
+  font-size: .75rem;
+  color: var(--ink-dim);
+  text-align: right;
+  /* APG: aria-live="polite" żeby czytnik odczytywał zmiany */
+}
+.char-count.near-limit { color: var(--warn); font-weight: 600; }
+.char-count.at-limit   { color: var(--error); font-weight: 700; }
+
+/* ═══════════════════════════════════════════
+   UKŁAD DWÓCH KOLUMN
+═══════════════════════════════════════════ */
+.field-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+/* ═══════════════════════════════════════════
+   RADIO GRUPY (APG: radiogroup pattern)
+═══════════════════════════════════════════ */
+.radio-group {
+  display: flex;
+  flex-direction: column;
+  gap: .5rem;
+  /* APG: role="radiogroup" na fieldset/div, aria-labelledby do legend */
+}
+.radio-item {
+  display: flex;
+  align-items: flex-start;
+  gap: .75rem;
+  padding: .75rem 1rem;
+  background: var(--paper);
+  border: 1.5px solid var(--line);
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: border-color var(--transition), background var(--transition);
+  position: relative;
+}
+.radio-item:hover { border-color: rgba(15,25,35,0.2); background: rgba(255,255,255,0.8); }
+.radio-item:has(input:checked) {
+  border-color: var(--accent);
+  background: rgba(26,106,255,0.04);
+}
+/* APG: input[type="radio"] musi mieć focus-visible */
+.radio-item input[type="radio"] {
+  width: 18px; height: 18px;
+  flex-shrink: 0;
+  margin-top: 2px;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+.radio-item input[type="radio"]:focus-visible {
+  outline: 3px solid var(--line-focus);
+  outline-offset: 2px;
+}
+.radio-text { display: flex; flex-direction: column; gap: .1rem; }
+.radio-label { font-size: .9rem; font-weight: 600; color: var(--ink); }
+.radio-desc  { font-size: .8rem; color: var(--ink-dim); }
+
+/* ═══════════════════════════════════════════
+   CHECKBOX (APG: checkbox pattern)
+═══════════════════════════════════════════ */
+.checkbox-item {
+  display: flex;
+  align-items: flex-start;
+  gap: .75rem;
+  cursor: pointer;
+}
+.checkbox-item input[type="checkbox"] {
+  width: 18px; height: 18px;
+  flex-shrink: 0;
+  margin-top: 2px;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+.checkbox-item input[type="checkbox"]:focus-visible {
+  outline: 3px solid var(--line-focus);
+  outline-offset: 2px;
+}
+.checkbox-text { font-size: .88rem; color: var(--ink-mid); line-height: 1.55; }
+.checkbox-text a { color: var(--accent); }
+.checkbox-text a:focus-visible { outline: 2px solid var(--line-focus); border-radius: 2px; }
+
+/* ═══════════════════════════════════════════
+   SELECT — CUSTOM WRAPPER (APG: listbox pattern)
+═══════════════════════════════════════════ */
+.select-wrapper {
+  position: relative;
+}
+.select-wrapper select {
+  appearance: none;
+  -webkit-appearance: none;
+  padding-right: 2.5rem;
+}
+.select-arrow {
+  position: absolute;
+  right: .9rem;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  color: var(--ink-dim);
+}
+
+/* ═══════════════════════════════════════════
+   LIVE REGION — komunikaty statusu (APG: aria-live)
+═══════════════════════════════════════════ */
+/* APG: region "polite" dla pomocnych komunikatów, "assertive" dla błędów krytycznych */
+#form-status {
+  /* Niewidoczny, ale czytany przez screen reader */
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip: rect(0,0,0,0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ═══════════════════════════════════════════
+   ALERT BANNER (APG: alert pattern)
+═══════════════════════════════════════════ */
+.alert-banner {
+  border-radius: var(--radius);
+  padding: .9rem 1.1rem;
+  font-size: .88rem;
+  display: flex;
+  align-items: flex-start;
+  gap: .65rem;
+  margin-bottom: 1.5rem;
+  /* APG: role="alert" lub role="status" */
+}
+.alert-banner svg { flex-shrink: 0; margin-top: 1px; }
+.alert-banner--error {
+  background: var(--error-bg);
+  color: var(--error);
+  border: 1px solid rgba(184,50,50,0.2);
+}
+.alert-banner--success {
+  background: var(--success-bg);
+  color: var(--success);
+  border: 1px solid rgba(26,122,74,0.2);
+}
+.alert-banner--info {
+  background: rgba(26,106,255,0.05);
+  color: var(--accent-d);
+  border: 1px solid rgba(26,106,255,0.15);
+}
+.alert-banner p { line-height: 1.55; }
+.alert-banner strong { font-weight: 700; display: block; margin-bottom: .15rem; }
+
+/* ═══════════════════════════════════════════
+   DIALOG MODALNY (APG: dialog pattern)
+═══════════════════════════════════════════ */
+/* APG: dialog musi mieć role="dialog", aria-modal="true", aria-labelledby,
+   focus trap, Escape zamyka, fokus wraca do triggera */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15,25,35,0.55);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity var(--transition), visibility var(--transition);
+}
+.modal-backdrop.is-open {
+  opacity: 1;
+  visibility: visible;
+}
+.modal {
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  padding: 2rem;
+  max-width: 480px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  transform: translateY(12px);
+  transition: transform var(--transition);
+  /* APG: role="dialog", aria-modal="true", aria-labelledby */
+}
+.modal-backdrop.is-open .modal { transform: translateY(0); }
+.modal-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+.modal-header h3 {
+  font-family: 'DM Serif Display', serif;
+  font-size: 1.4rem;
+  color: var(--ink);
+  letter-spacing: -.02em;
+}
+.modal-close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--ink-dim);
+  padding: .25rem;
+  border-radius: var(--radius-sm);
+  flex-shrink: 0;
+  transition: color var(--transition), background var(--transition);
+  /* APG: aria-label="Zamknij okno dialogowe" */
+}
+.modal-close:hover { color: var(--ink); background: var(--paper); }
+.modal-close:focus-visible {
+  outline: 3px solid var(--line-focus);
+  outline-offset: 2px;
+}
+.modal-body p { font-size: .9rem; color: var(--ink-mid); line-height: 1.7; margin-bottom: .75rem; }
+.modal-footer {
+  display: flex;
+  gap: .75rem;
+  justify-content: flex-end;
+  margin-top: 1.5rem;
+  flex-wrap: wrap;
+}
+
+/* ═══════════════════════════════════════════
+   TOOLTIP (APG: tooltip pattern)
+═══════════════════════════════════════════ */
+/* APG: role="tooltip", aria-describedby na elemencie triggerze,
+   pojawia się na hover i focus */
+.tooltip-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+.tooltip-trigger {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--ink-dim);
+  padding: 2px;
+  border-radius: 50%;
+  line-height: 0;
+  transition: color var(--transition);
+}
+.tooltip-trigger:hover { color: var(--accent); }
+.tooltip-trigger:focus-visible {
+  outline: 2px solid var(--line-focus);
+  outline-offset: 2px;
+  color: var(--accent);
+}
+.tooltip-box {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--ink);
+  color: #fff;
+  font-size: .78rem;
+  line-height: 1.4;
+  padding: .45rem .7rem;
+  border-radius: var(--radius-sm);
+  white-space: nowrap;
+  max-width: 220px;
+  white-space: normal;
+  text-align: center;
+  z-index: 200;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity var(--transition), visibility var(--transition);
+  /* APG: rola tooltip */
+}
+.tooltip-box::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 5px solid transparent;
+  border-top-color: var(--ink);
+}
+.tooltip-trigger:hover + .tooltip-box,
+.tooltip-trigger:focus + .tooltip-box {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* ═══════════════════════════════════════════
+   PRZYCISKI (APG: button pattern)
+═══════════════════════════════════════════ */
+/* APG: każdy przycisk ma accessible name, focus-visible, nie usuwa outline */
+.btn {
+  font-family: 'DM Sans', sans-serif;
+  font-size: .9rem;
+  font-weight: 700;
+  padding: .7rem 1.6rem;
+  border-radius: var(--radius);
+  border: 1.5px solid transparent;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  text-decoration: none;
+  transition: background var(--transition), color var(--transition),
+              border-color var(--transition), box-shadow var(--transition),
+              transform 80ms ease;
+  line-height: 1;
+}
+.btn:active { transform: scale(0.98); }
+.btn:focus-visible {
+  outline: 3px solid var(--line-focus);
+  outline-offset: 3px;
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+.btn-primary:hover { background: var(--accent-d); border-color: var(--accent-d); }
+
+.btn-secondary {
+  background: var(--paper);
+  color: var(--ink);
+  border-color: var(--line);
+}
+.btn-secondary:hover { background: rgba(15,25,35,0.05); }
+
+.btn-ghost {
+  background: none;
+  color: var(--ink-mid);
+  border-color: transparent;
+}
+.btn-ghost:hover { background: var(--paper); color: var(--ink); }
+
+/* Loading state — APG: aria-busy="true" podczas przetwarzania */
+.btn[aria-busy="true"] {
+  pointer-events: none;
+  opacity: .75;
+}
+.btn[aria-busy="true"]::after {
+  content: '';
+  width: 14px; height: 14px;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 600ms linear infinite;
+  margin-left: .2rem;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ═══════════════════════════════════════════
+   STOPKA FORMULARZA
+═══════════════════════════════════════════ */
+.form-footer {
+  padding: 1.4rem 2rem;
+  border-top: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  background: rgba(247,244,239,0.5);
+}
+
+/* ═══════════════════════════════════════════
+   POTWIERDZENIE (sukces)
+═══════════════════════════════════════════ */
+.success-panel {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  padding: 3rem 2rem;
+  text-align: center;
+  display: none;
+  /* APG: role="status" lub focus przesuwany do nagłówka po sukcesie */
+}
+.success-panel .success-icon {
+  width: 56px; height: 56px;
+  background: var(--success-bg);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.25rem;
+  color: var(--success);
+}
+.success-panel h2 {
+  font-family: 'DM Serif Display', serif;
+  font-size: 1.8rem;
+  color: var(--ink);
+  letter-spacing: -.03em;
+  margin-bottom: .6rem;
+}
+.success-panel p { font-size: .95rem; color: var(--ink-mid); max-width: 400px; margin: 0 auto .5rem; }
+.success-detail {
+  background: var(--paper);
+  border-radius: var(--radius);
+  padding: 1rem 1.4rem;
+  margin: 1.25rem auto 0;
+  max-width: 420px;
+  text-align: left;
+  font-size: .88rem;
+  color: var(--ink-mid);
+  line-height: 1.8;
+}
+
+/* ═══════════════════════════════════════════
+   PANEL ARIA (informacje pomocnicze)
+═══════════════════════════════════════════ */
+.aside-panel {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  box-shadow: var(--shadow);
+  margin-top: 2rem;
+}
+.aside-panel h3 {
+  font-family: 'DM Serif Display', serif;
+  font-size: 1.1rem;
+  color: var(--ink);
+  margin-bottom: .75rem;
+}
+.aria-tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .4rem;
+}
+.aria-tag {
+  font-size: .72rem;
+  font-family: 'Courier New', monospace;
+  background: rgba(26,106,255,0.07);
+  color: var(--accent-d);
+  border: 1px solid rgba(26,106,255,0.15);
+  border-radius: var(--radius-sm);
+  padding: .2rem .5rem;
+  font-weight: 600;
+}
+
+/* ═══════════════════════════════════════════
+   STOPKA STRONY
+═══════════════════════════════════════════ */
+.site-footer {
+  background: var(--surface);
+  border-top: 1px solid var(--line);
+  padding: 1.5rem 2rem;
+  text-align: center;
+}
+.site-footer p {
+  font-size: .8rem;
+  color: var(--ink-dim);
+}
+.site-footer a { color: var(--accent); text-decoration: none; }
+.site-footer a:hover { text-decoration: underline; }
+.site-footer a:focus-visible { outline: 2px solid var(--line-focus); border-radius: 2px; }
+
+/* ═══════════════════════════════════════════
+   RESPONSYWNOŚĆ
+═══════════════════════════════════════════ */
+@media (max-width: 640px) {
+  main { padding: 2rem 1rem 4rem; }
+  .form-body { padding: 1.2rem 1rem; }
+  .form-card-header { padding: 1.2rem 1rem .9rem; }
+  .form-footer { padding: 1rem; }
+  .field-row { grid-template-columns: 1fr; }
+  .progress-nav { flex-wrap: wrap; gap: .25rem; }
+  .progress-sep { display: none; }
+  .header-inner { flex-wrap: wrap; }
+  .modal { padding: 1.5rem 1.2rem; }
+}
+
+/* ═══════════════════════════════════════════
+   KLASA POMOCNICZA — ukryty wizualnie, czytany
+═══════════════════════════════════════════ */
+/* APG: visually-hidden dla tekstu widocznego tylko dla AT */
+.sr-only {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip: rect(0,0,0,0);
+  white-space: nowrap;
+  border: 0;
+}
+</style>
+</head>
+<body>
+
+<!-- ╔══════════════════════════════════════════
+     SKIP LINK — APG: Keyboard Navigation Fundamentals
+     ══════════════════════════════════════════╗ -->
+<a href="#main-content" class="skip-link">Przejdź do treści głównej</a>
+
+<!-- Live region dla statusów (niewidoczny) -->
+<!-- APG: aria-live="polite" dla nieblokujących aktualizacji -->
+<div id="form-status" aria-live="polite" aria-atomic="true"></div>
+
+<!-- ╔══════════════════════════════════════════
+     HEADER — APG: Landmark Regions
+     ══════════════════════════════════════════╗ -->
+<header class="site-header" role="banner">
+  <div class="header-inner">
+    <a href="#" class="logo" aria-label="ARIA Form — strona główna">
+      ARIA<strong>form</strong>
+    </a>
+    <!-- APG: aria-label na nav, aria-current="page" na aktywnym linku -->
+    <nav class="site-nav" aria-label="Nawigacja główna">
+      <a href="#">Strona główna</a>
+      <a href="#" aria-current="page">Formularz</a>
+      <a href="#">Dokumentacja</a>
+    </nav>
+  </div>
+</header>
+
+<!-- ╔══════════════════════════════════════════
+     MAIN — APG: Landmark role="main"
+     ══════════════════════════════════════════╗ -->
+<main id="main-content" role="main" tabindex="-1">
+  <div class="page-intro">
+    <div class="page-eyebrow" aria-hidden="true">WAI-ARIA APG · Formularz</div>
+    <h1>Formularz zgłoszeniowy<br><em style="font-style:italic;color:var(--ink-mid);">szkolenia UX</em></h1>
+    <p>Formularz implementujący wszystkie wzorce ARIA Authoring Practices Guide — landmarks, live regions, dialog, tooltip, radiogroup, alert i kompletna obsługa klawiatury.</p>
+  </div>
+
+  <!-- Wskaźnik kroków
+       APG: role="list" + aria-current="step" na aktywnym kroku -->
+  <nav aria-label="Postęp wypełniania formularza">
+    <ol class="progress-nav" role="list">
+      <li class="progress-step" role="listitem" data-done="true">
+        <span class="step-num" aria-hidden="true">✓</span>
+        <span>Wybór szkolenia</span>
+      </li>
+      <li class="progress-sep" role="presentation" aria-hidden="true"></li>
+      <li class="progress-step" role="listitem" aria-current="step">
+        <span class="step-num" aria-hidden="true">2</span>
+        <span>Dane uczestnika</span>
+      </li>
+      <li class="progress-sep" role="presentation" aria-hidden="true"></li>
+      <li class="progress-step" role="listitem">
+        <span class="step-num" aria-hidden="true">3</span>
+        <span>Potwierdzenie</span>
+      </li>
+    </ol>
+  </nav>
+
+  <!-- ── GLOBALNY ALERT O BŁĘDACH ──────────────────
+       APG: role="alert" — czytany natychmiast przez AT
+  ─────────────────────────────────────────────── -->
+  <div
+    id="global-error"
+    role="alert"
+    aria-atomic="true"
+    class="alert-banner alert-banner--error"
+    style="display:none;"
+    aria-label="Błędy w formularzu"
+  >
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+      <line x1="12" y1="8" x2="12" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      <circle cx="12" cy="16" r="1" fill="currentColor"/>
+    </svg>
+    <div>
+      <strong>Formularz zawiera błędy</strong>
+      <p id="global-error-list"></p>
+    </div>
+  </div>
+
+  <!-- ── KARTA FORMULARZA ─────────────────────────── -->
+  <div class="form-card" id="form-wrapper">
+    <div class="form-card-header">
+      <h2 id="form-heading">Dane uczestnika szkolenia</h2>
+      <p class="required-legend">
+        Pola oznaczone <span class="req-marker" aria-hidden="true">*</span>
+        <span class="sr-only">gwiazdką</span> są wymagane
+      </p>
+    </div>
+
+    <!-- APG: aria-labelledby wskazuje na nagłówek formularza -->
+    <form
+      id="registration-form"
+      novalidate
+      aria-labelledby="form-heading"
+      aria-describedby="form-instructions"
+    >
+      <!-- Ukryty opis dla czytników ekranu -->
+      <p id="form-instructions" class="sr-only">
+        Formularz zgłoszenia na szkolenie UX. Wypełnij wszystkie wymagane pola
+        oznaczone gwiazdką. Błędy walidacji są opisane przy każdym polu.
+      </p>
+
+      <div class="form-body">
+
+        <!-- ══ SEKCJA 1: Dane osobowe ══════════════════ -->
+        <!-- APG: group + aria-labelledby dla sekcji -->
+        <fieldset class="form-section" aria-labelledby="section-personal">
+          <legend id="section-personal" class="form-section-label">Dane osobowe</legend>
+
+          <div class="field-row">
+            <!-- ── IMIĘ ────────────────────────────────
+                 APG: label jawnie powiązany [for], aria-required,
+                      aria-describedby do opisu, aria-invalid do błędu -->
+            <div class="field" id="field-imie">
+              <label for="imie">
+                Imię
+                <span class="req" aria-label="wymagane">*</span>
+              </label>
+              <input
+                type="text"
+                id="imie"
+                name="imie"
+                autocomplete="given-name"
+                aria-required="true"
+                aria-describedby="imie-error"
+                aria-invalid="false"
+                placeholder="np. Marta"
+                spellcheck="false"
+              >
+              <!-- APG: id komunikatu błędu zgodny z aria-describedby -->
+              <span
+                id="imie-error"
+                class="field-error-msg"
+                role="alert"
+                aria-atomic="true"
+                style="display:none;"
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+                  <line x1="12" y1="8" x2="12" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                  <circle cx="12" cy="16" r="1" fill="currentColor"/>
+                </svg>
+                <span></span>
+              </span>
+            </div>
+
+            <!-- ── NAZWISKO ──────────────────────────── -->
+            <div class="field" id="field-nazwisko">
+              <label for="nazwisko">
+                Nazwisko
+                <span class="req" aria-label="wymagane">*</span>
+              </label>
+              <input
+                type="text"
+                id="nazwisko"
+                name="nazwisko"
+                autocomplete="family-name"
+                aria-required="true"
+                aria-describedby="nazwisko-error"
+                aria-invalid="false"
+                placeholder="np. Kowalska"
+                spellcheck="false"
+              >
+              <span id="nazwisko-error" class="field-error-msg" role="alert" aria-atomic="true" style="display:none;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+                  <line x1="12" y1="8" x2="12" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                  <circle cx="12" cy="16" r="1" fill="currentColor"/>
+                </svg>
+                <span></span>
+              </span>
+            </div>
+          </div>
+
+          <!-- ── E-MAIL ────────────────────────────────
+               APG: aria-describedby łączy WIELE opisów
+                    (hint + error) przez spację-oddzielone id -->
+          <div class="field" id="field-email">
+            <label for="email">
+              Adres e-mail
+              <span class="req" aria-label="wymagane">*</span>
+              <!-- APG: tooltip pattern — trigger z aria-describedby -->
+              <span class="tooltip-wrap" style="margin-left:.25rem;">
+                <button
+                  type="button"
+                  class="tooltip-trigger"
+                  aria-describedby="email-tooltip"
+                  aria-label="Informacja o adresie e-mail"
+                >
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+                    <line x1="12" y1="16" x2="12" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    <circle cx="12" cy="8" r="1" fill="currentColor"/>
+                  </svg>
+                </button>
+                <!-- APG: role="tooltip" -->
+                <span id="email-tooltip" role="tooltip" class="tooltip-box">
+                  Wyślemy na ten adres link potwierdzający rejestrację
+                </span>
+              </span>
+            </label>
+            <span class="field-desc" id="email-hint">
+              Używaj firmowego adresu e-mail jeśli to możliwe.
+            </span>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              autocomplete="email"
+              aria-required="true"
+              aria-describedby="email-hint email-error"
+              aria-invalid="false"
+              placeholder="np. marta@firma.pl"
+              inputmode="email"
+            >
+            <span id="email-error" class="field-error-msg" role="alert" aria-atomic="true" style="display:none;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+                <line x1="12" y1="8" x2="12" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <circle cx="12" cy="16" r="1" fill="currentColor"/>
+              </svg>
+              <span></span>
+            </span>
+          </div>
+
+          <!-- ── TELEFON ───────────────────────────── -->
+          <div class="field" id="field-telefon">
+            <label for="telefon">Telefon kontaktowy</label>
+            <span class="field-desc" id="telefon-hint">Nieobowiązkowo. Format: +48 000 000 000</span>
+            <input
+              type="tel"
+              id="telefon"
+              name="telefon"
+              autocomplete="tel"
+              aria-describedby="telefon-hint telefon-error"
+              aria-invalid="false"
+              placeholder="+48 000 000 000"
+              inputmode="tel"
+            >
+            <span id="telefon-error" class="field-error-msg" role="alert" aria-atomic="true" style="display:none;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+                <line x1="12" y1="8" x2="12" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <circle cx="12" cy="16" r="1" fill="currentColor"/>
+              </svg>
+              <span></span>
+            </span>
+          </div>
+
+        </fieldset>
+
+        <!-- ══ SEKCJA 2: Szczegóły szkolenia ═══════════ -->
+        <fieldset class="form-section" aria-labelledby="section-training">
+          <legend id="section-training" class="form-section-label">Szczegóły szkolenia</legend>
+
+          <!-- ── SELECT: Moduł szkolenia ──────────────
+               APG: select ma label + hint przez aria-describedby -->
+          <div class="field" id="field-modul">
+            <label for="modul">
+              Moduł szkolenia
+              <span class="req" aria-label="wymagane">*</span>
+            </label>
+            <div class="select-wrapper">
+              <select
+                id="modul"
+                name="modul"
+                aria-required="true"
+                aria-describedby="modul-hint modul-error"
+                aria-invalid="false"
+              >
+                <option value="">— Wybierz moduł —</option>
+                <option value="podstawy">Podstawy UX Research</option>
+                <option value="projektowanie">Projektowanie dostępnych interfejsów</option>
+                <option value="testowanie">Testowanie użyteczności</option>
+                <option value="aria">ARIA i technologie wspomagające</option>
+              </select>
+              <svg class="select-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <polyline points="6 9 12 15 18 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            <span class="field-desc" id="modul-hint">Wybierz jeden moduł szkoleniowy.</span>
+            <span id="modul-error" class="field-error-msg" role="alert" aria-atomic="true" style="display:none;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+                <line x1="12" y1="8" x2="12" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <circle cx="12" cy="16" r="1" fill="currentColor"/>
+              </svg>
+              <span></span>
+            </span>
+          </div>
+
+          <!-- ── RADIOGROUP: Forma uczestnictwa ────────
+               APG: fieldset + legend = radiogroup,
+                    navigacja strzałkami między opcjami (roving tabindex) -->
+          <div class="field">
+            <fieldset>
+              <legend class="field-label" id="forma-label" style="font-size:.88rem;font-weight:700;color:var(--ink);margin-bottom:.5rem;">
+                Forma uczestnictwa
+                <span class="req" aria-label="wymagane">*</span>
+              </legend>
+              <!-- APG: role="radiogroup" dla grupy radio -->
+              <div
+                class="radio-group"
+                role="radiogroup"
+                aria-labelledby="forma-label"
+                aria-required="true"
+                id="field-forma"
+              >
+                <label class="radio-item">
+                  <input
+                    type="radio"
+                    name="forma"
+                    value="stacjonarnie"
+                    aria-describedby="forma-stacjonarnie-desc"
+                  >
+                  <span class="radio-text">
+                    <span class="radio-label">Stacjonarnie</span>
+                    <span class="radio-desc" id="forma-stacjonarnie-desc">Warszawa, ul. Chmielna 12 — sala 204</span>
+                  </span>
+                </label>
+                <label class="radio-item">
+                  <input
+                    type="radio"
+                    name="forma"
+                    value="online"
+                    aria-describedby="forma-online-desc"
+                  >
+                  <span class="radio-text">
+                    <span class="radio-label">Online (live)</span>
+                    <span class="radio-desc" id="forma-online-desc">Transmisja na żywo, pełna interaktywność</span>
+                  </span>
+                </label>
+                <label class="radio-item">
+                  <input
+                    type="radio"
+                    name="forma"
+                    value="nagranie"
+                    aria-describedby="forma-nagranie-desc"
+                  >
+                  <span class="radio-text">
+                    <span class="radio-label">Nagranie (async)</span>
+                    <span class="radio-desc" id="forma-nagranie-desc">Dostęp do nagrania przez 12 miesięcy</span>
+                  </span>
+                </label>
+              </div>
+              <span id="forma-error" class="field-error-msg" role="alert" aria-atomic="true" style="display:none;margin-top:.4rem;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+                  <line x1="12" y1="8" x2="12" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                  <circle cx="12" cy="16" r="1" fill="currentColor"/>
+                </svg>
+                <span></span>
+              </span>
+            </fieldset>
+          </div>
+
+          <!-- ── DATA SZKOLENIA ─────────────────────── -->
+          <div class="field" id="field-data">
+            <label for="data-szkolenia">
+              Preferowana data szkolenia
+              <span class="req" aria-label="wymagane">*</span>
+            </label>
+            <span class="field-desc" id="data-hint">Format: DD.MM.RRRR. Najbliższe terminy: marzec–kwiecień 2026.</span>
+            <input
+              type="date"
+              id="data-szkolenia"
+              name="data"
+              aria-required="true"
+              aria-describedby="data-hint data-error"
+              aria-invalid="false"
+              min="2026-06-01"
+            >
+            <span id="data-error" class="field-error-msg" role="alert" aria-atomic="true" style="display:none;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+                <line x1="12" y1="8" x2="12" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <circle cx="12" cy="16" r="1" fill="currentColor"/>
+              </svg>
+              <span></span>
+            </span>
+          </div>
+
+        </fieldset>
+
+        <!-- ══ SEKCJA 3: Dodatkowe informacje ══════════ -->
+        <fieldset class="form-section" aria-labelledby="section-extra">
+          <legend id="section-extra" class="form-section-label">Dodatkowe informacje</legend>
+
+          <!-- ── TEXTAREA z licznikiem znaków ──────────
+               APG: aria-live="polite" na liczniku znaków,
+                    maxlength + aria-describedby do licznika -->
+          <div class="field" id="field-uwagi">
+            <label for="uwagi">
+              Uwagi i potrzeby szczególne
+            </label>
+            <span class="field-desc" id="uwagi-hint">
+              Opisz ewentualne potrzeby dostępności (tłumacz, podjazd, dieta itp.).
+            </span>
+            <textarea
+              id="uwagi"
+              name="uwagi"
+              maxlength="500"
+              aria-describedby="uwagi-hint uwagi-count"
+              rows="4"
+              placeholder="Wpisz tutaj dodatkowe uwagi..."
+            ></textarea>
+            <!-- APG: aria-live="polite" — licznik czytany po zatrzymaniu pisania -->
+            <div
+              id="uwagi-count"
+              class="char-count"
+              aria-live="polite"
+              aria-atomic="true"
+            >0 / 500 znaków</div>
+          </div>
+
+          <!-- ── CHECKBOXY (APG: zgody) ──────────────── -->
+          <div class="field">
+            <fieldset>
+              <legend class="field-label" style="font-size:.88rem;font-weight:700;color:var(--ink);margin-bottom:.65rem;">
+                Zgody
+              </legend>
+
+              <!-- Checkbox 1 — wymagany -->
+              <div class="field" id="field-zgoda-rodo" style="margin-bottom:.75rem;">
+                <label class="checkbox-item">
+                  <input
+                    type="checkbox"
+                    id="zgoda-rodo"
+                    name="zgoda_rodo"
+                    aria-required="true"
+                    aria-describedby="zgoda-rodo-hint zgoda-rodo-error"
+                    aria-invalid="false"
+                  >
+                  <span class="checkbox-text">
+                    Wyrażam zgodę na przetwarzanie moich danych osobowych w celu rejestracji na szkolenie.
+                    <span class="req" aria-label="wymagane">*</span>
+                    <span id="zgoda-rodo-hint" class="sr-only">
+                      Zgoda jest wymagana. Przeczytaj pełną treść polityki prywatności przed zaznaczeniem.
+                    </span>
+                  </span>
+                </label>
+                <span id="zgoda-rodo-error" class="field-error-msg" role="alert" aria-atomic="true" style="display:none;margin-top:.3rem;margin-left:1.6rem;">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+                    <line x1="12" y1="8" x2="12" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    <circle cx="12" cy="16" r="1" fill="currentColor"/>
+                  </svg>
+                  <span></span>
+                </span>
+              </div>
+
+              <!-- Checkbox 2 — opcjonalny -->
+              <label class="checkbox-item">
+                <input
+                  type="checkbox"
+                  id="zgoda-marketing"
+                  name="zgoda_marketing"
+                >
+                <span class="checkbox-text">
+                  Chcę otrzymywać informacje o kolejnych szkoleniach i materiałach edukacyjnych.
+                  <button
+                    type="button"
+                    id="btn-polityka"
+                    class="btn btn-ghost"
+                    style="font-size:.8rem;padding:.2rem .5rem;height:auto;"
+                    aria-haspopup="dialog"
+                    aria-controls="modal-polityka"
+                  >
+                    Przeczytaj politykę
+                  </button>
+                </span>
+              </label>
+
+            </fieldset>
+          </div>
+
+        </fieldset>
+      </div><!-- /form-body -->
+
+      <!-- Stopka formularza z przyciskami -->
+      <div class="form-footer">
+        <a href="#" class="btn btn-secondary">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <polyline points="15 18 9 12 15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          Cofnij
+        </a>
+        <button
+          type="submit"
+          class="btn btn-primary"
+          id="btn-submit"
+          aria-describedby="submit-hint"
+        >
+          Zarejestruj się na szkolenie
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <polyline points="9 18 15 12 9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </button>
+        <p id="submit-hint" class="sr-only">
+          Naciśnij Enter lub Spację aby przesłać formularz. Przed wysłaniem zostaną sprawdzone wszystkie wymagane pola.
+        </p>
+      </div>
+
+    </form>
+  </div><!-- /form-card -->
+
+  <!-- ── PANEL SUKCESU ──────────────────────────────
+       APG: focus przenoszony do nagłówka po sukcesie,
+            role="status" informuje AT -->
+  <div
+    class="success-panel"
+    id="success-panel"
+    role="status"
+    aria-live="polite"
+    aria-atomic="true"
+    tabindex="-1"
+  >
+    <div class="success-icon" aria-hidden="true">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+        <polyline points="20 6 9 17 4 12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    <h2 id="success-heading" tabindex="-1">Rejestracja potwierdzona!</h2>
+    <p>Twoje zgłoszenie zostało przyjęte. Szczegóły wysłaliśmy na podany adres e-mail.</p>
+    <p>Numer zgłoszenia: <strong id="registration-number"></strong></p>
+    <div class="success-detail" id="success-summary"></div>
+    <div style="margin-top:1.5rem;display:flex;gap:.75rem;justify-content:center;flex-wrap:wrap;">
+      <button type="button" class="btn btn-secondary" onclick="location.reload()">
+        Zarejestruj kolejną osobę
+      </button>
+    </div>
+  </div>
+
+  <!-- ── PANEL ARIA TAGS ───────────────────────────── -->
+  <aside class="aside-panel" aria-label="Zastosowane wzorce ARIA APG">
+    <h3>Wzorce ARIA APG zastosowane na tej stronie</h3>
+    <div class="aria-tag-list" role="list">
+      <span role="listitem" class="aria-tag">role="banner"</span>
+      <span role="listitem" class="aria-tag">role="main"</span>
+      <span role="listitem" class="aria-tag">role="navigation"</span>
+      <span role="listitem" class="aria-tag">role="contentinfo"</span>
+      <span role="listitem" class="aria-tag">role="alert"</span>
+      <span role="listitem" class="aria-tag">role="status"</span>
+      <span role="listitem" class="aria-tag">role="dialog"</span>
+      <span role="listitem" class="aria-tag">role="tooltip"</span>
+      <span role="listitem" class="aria-tag">role="radiogroup"</span>
+      <span role="listitem" class="aria-tag">role="list"</span>
+      <span role="listitem" class="aria-tag">aria-live="polite"</span>
+      <span role="listitem" class="aria-tag">aria-live="assertive"</span>
+      <span role="listitem" class="aria-tag">aria-atomic="true"</span>
+      <span role="listitem" class="aria-tag">aria-required</span>
+      <span role="listitem" class="aria-tag">aria-invalid</span>
+      <span role="listitem" class="aria-tag">aria-describedby</span>
+      <span role="listitem" class="aria-tag">aria-labelledby</span>
+      <span role="listitem" class="aria-tag">aria-current="page"</span>
+      <span role="listitem" class="aria-tag">aria-current="step"</span>
+      <span role="listitem" class="aria-tag">aria-haspopup="dialog"</span>
+      <span role="listitem" class="aria-tag">aria-modal="true"</span>
+      <span role="listitem" class="aria-tag">aria-controls</span>
+      <span role="listitem" class="aria-tag">aria-busy</span>
+      <span role="listitem" class="aria-tag">aria-hidden="true"</span>
+      <span role="listitem" class="aria-tag">aria-label</span>
+      <span role="listitem" class="aria-tag">tabindex="-1"</span>
+      <span role="listitem" class="aria-tag">focus-visible</span>
+      <span role="listitem" class="aria-tag">skip-link</span>
+      <span role="listitem" class="aria-tag">focus-trap (dialog)</span>
+      <span role="listitem" class="aria-tag">prefers-reduced-motion</span>
+    </div>
+  </aside>
+
+</main>
+
+<!-- ╔══════════════════════════════════════════
+     DIALOG MODALNY — APG: Dialog (Modal) Pattern
+     • role="dialog" + aria-modal="true"
+     • aria-labelledby → tytuł dialogu
+     • Focus trap: Tab i Shift+Tab zostają w dialogu
+     • Escape zamyka
+     • Fokus wraca do triggera po zamknięciu
+     ══════════════════════════════════════════╗ -->
+<div
+  class="modal-backdrop"
+  id="modal-polityka"
+  role="none"
+>
+  <div
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="modal-title"
+    aria-describedby="modal-desc"
+    class="modal"
+    id="modal-inner"
+  >
+    <div class="modal-header">
+      <h3 id="modal-title">Polityka marketingowa</h3>
+      <button
+        type="button"
+        class="modal-close"
+        id="modal-close-btn"
+        aria-label="Zamknij okno dialogowe: Polityka marketingowa"
+      >
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          <line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </button>
+    </div>
+    <div class="modal-body" id="modal-desc">
+      <p>Wyrażając zgodę marketingową, akceptujesz przesyłanie informacji o szkoleniach i materiałach edukacyjnych na podany adres e-mail.</p>
+      <p>Możesz wycofać zgodę w dowolnym momencie, wysyłając wiadomość na adres <strong>rodo@ariaform.pl</strong> lub klikając link rezygnacji w każdym e-mailu.</p>
+      <p>Twoje dane nie będą udostępniane podmiotom trzecim w celach marketingowych. Administrator danych: ARIAform Sp. z o.o., ul. Dostępna 1, 00-001 Warszawa.</p>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secondary" id="modal-cancel-btn">Zamknij</button>
+      <button
+        type="button"
+        class="btn btn-primary"
+        id="modal-accept-btn"
+      >
+        Zaznacz zgodę
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ╔══════════════════════════════════════════
+     FOOTER — APG: Landmark role="contentinfo"
+     ══════════════════════════════════════════╗ -->
+<footer class="site-footer" role="contentinfo">
+  <p>
+    Formularz demonstracyjny · Wzorce
+    <a href="https://www.w3.org/WAI/ARIA/apg/" target="_blank" rel="noopener" aria-label="ARIA APG — otwiera się w nowej karcie">ARIA APG W3C</a>
+    · Implementacja edukacyjna
+  </p>
+</footer>
+
+<!-- ╔══════════════════════════════════════════
+     JAVASCRIPT — ARIA LIVE + WALIDACJA + DIALOG
+     ══════════════════════════════════════════╗ -->
+<script>
+'use strict';
+
+// ── Pomocnicze ──────────────────────────────
+const $ = id => document.getElementById(id);
+const announce = (msg, mode = 'polite') => {
+  // APG: ogłoszenie przez aria-live region
+  const el = $('form-status');
+  el.setAttribute('aria-live', mode);
+  el.textContent = '';
+  // Mały timeout wymuszający DOM update (AT trigger)
+  setTimeout(() => { el.textContent = msg; }, 50);
+};
+
+// ── LICZNIK ZNAKÓW ───────────────────────────
+// APG: aria-live="polite" na liczniku
+const textarea = $('uwagi');
+const counter  = $('uwagi-count');
+const MAX = 500;
+textarea.addEventListener('input', () => {
+  const n = textarea.value.length;
+  const left = MAX - n;
+  counter.textContent = `${n} / ${MAX} znaków`;
+  counter.className = 'char-count';
+  if (left <= 50 && left > 10) counter.classList.add('near-limit');
+  if (left <= 10) counter.classList.add('at-limit');
+  // Ogłoś dla AT przy zbliżaniu się limitu (APG: aria-live)
+  if (left === 50) announce('Pozostało 50 znaków.');
+  if (left === 10) announce('Zostało tylko 10 znaków!', 'assertive');
+});
+
+// ── WALIDACJA POLA ─────────────────────────────────────
+// APG: aria-invalid="true/false" + aria-describedby do komunikatu błędu
+function setError(fieldId, inputId, errorId, message) {
+  const field = $(fieldId);
+  const input = $(inputId);
+  const errorEl = $(errorId);
+  field.classList.add('is-error');
+  field.classList.remove('is-valid');
+  input.setAttribute('aria-invalid', 'true');
+  errorEl.querySelector('span').textContent = message;
+  errorEl.style.display = 'flex';
+}
+function clearError(fieldId, inputId, errorId) {
+  const field = $(fieldId);
+  const input = $(inputId);
+  const errorEl = $(errorId);
+  field.classList.remove('is-error');
+  field.classList.add('is-valid');
+  input.setAttribute('aria-invalid', 'false');
+  errorEl.style.display = 'none';
+}
+function setFieldError(name, errorId, message) {
+  // Dla radio/checkbox bez standardowego field-id
+  const errorEl = $(errorId);
+  if (!errorEl) return;
+  errorEl.querySelector('span').textContent = message;
+  errorEl.style.display = 'flex';
+}
+function clearFieldError(errorId) {
+  const errorEl = $(errorId);
+  if (!errorEl) return;
+  errorEl.style.display = 'none';
+}
+
+// Walidacja przy opuszczaniu pola (blur) — APG: nie waliduj tylko na submit
+['imie','nazwisko','email','telefon'].forEach(id => {
+  const input = document.getElementById(id);
+  if (!input) return;
+  input.addEventListener('blur', () => validateField(id));
+  input.addEventListener('input', () => {
+    // Usuń błąd gdy użytkownik zaczyna poprawiać
+    if (input.getAttribute('aria-invalid') === 'true') validateField(id);
+  });
+});
+
+function validateField(id) {
+  const val = document.getElementById(id).value.trim();
+  if (id === 'imie') {
+    if (!val) setError('field-imie','imie','imie-error','Imię jest wymagane.');
+    else if (val.length < 2) setError('field-imie','imie','imie-error','Imię musi mieć co najmniej 2 znaki.');
+    else clearError('field-imie','imie','imie-error');
+  }
+  if (id === 'nazwisko') {
+    if (!val) setError('field-nazwisko','nazwisko','nazwisko-error','Nazwisko jest wymagane.');
+    else if (val.length < 2) setError('field-nazwisko','nazwisko','nazwisko-error','Nazwisko musi mieć co najmniej 2 znaki.');
+    else clearError('field-nazwisko','nazwisko','nazwisko-error');
+  }
+  if (id === 'email') {
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!val) setError('field-email','email','email-error','Adres e-mail jest wymagany.');
+    else if (!re.test(val)) setError('field-email','email','email-error','Wpisz poprawny adres e-mail, np. imie@firma.pl.');
+    else clearError('field-email','email','email-error');
+  }
+  if (id === 'telefon') {
+    if (val && !/^[+\d\s\-()]{7,20}$/.test(val))
+      setError('field-telefon','telefon','telefon-error','Numer telefonu zawiera niedozwolone znaki.');
+    else { document.getElementById('field-telefon').classList.remove('is-error','is-valid'); $('telefon-error').style.display='none'; document.getElementById('telefon').setAttribute('aria-invalid','false'); }
+  }
+}
+
+// ── SUBMIT ──────────────────────────────────────────────
+// APG: po błędzie — fokus na pierwszy błędny element
+//      po sukcesie — fokus na nagłówek potwierdzenia
+$('registration-form').addEventListener('submit', function(e) {
+  e.preventDefault();
+  let firstErrorEl = null;
+  let errors = [];
+
+  // Waliduj wszystkie pola
+  ['imie','nazwisko','email','telefon'].forEach(id => validateField(id));
+
+  // Sprawdź select
+  const modul = $('modul').value;
+  if (!modul) {
+    setError('field-modul','modul','modul-error','Wybierz moduł szkolenia.');
+    errors.push('Moduł szkolenia');
+    if (!firstErrorEl) firstErrorEl = $('modul');
+  } else {
+    clearError('field-modul','modul','modul-error');
+  }
+
+  // Sprawdź radio
+  const forma = document.querySelector('[name="forma"]:checked');
+  if (!forma) {
+    setFieldError('field-forma', 'forma-error', 'Wybierz formę uczestnictwa.');
+    errors.push('Forma uczestnictwa');
+    if (!firstErrorEl) firstErrorEl = document.querySelector('[name="forma"]');
+  } else {
+    clearFieldError('forma-error');
+  }
+
+  // Sprawdź datę
+  const data = $('data-szkolenia').value;
+  if (!data) {
+    setError('field-data','data-szkolenia','data-error','Wybierz preferowaną datę szkolenia.');
+    errors.push('Data szkolenia');
+    if (!firstErrorEl) firstErrorEl = $('data-szkolenia');
+  } else {
+    clearError('field-data','data-szkolenia','data-error');
+  }
+
+  // Sprawdź błędy istniejące
+  const imiErr = document.getElementById('imie').getAttribute('aria-invalid') === 'true';
+  const nazErr = document.getElementById('nazwisko').getAttribute('aria-invalid') === 'true';
+  const emailErr = document.getElementById('email').getAttribute('aria-invalid') === 'true';
+  if (imiErr) { errors.push('Imię'); if (!firstErrorEl) firstErrorEl = $('imie'); }
+  if (nazErr) { errors.push('Nazwisko'); if (!firstErrorEl) firstErrorEl = $('nazwisko'); }
+  if (emailErr) { errors.push('Adres e-mail'); if (!firstErrorEl) firstErrorEl = $('email'); }
+
+  // Sprawdź checkbox RODO
+  if (!$('zgoda-rodo').checked) {
+    const errorEl = $('zgoda-rodo-error');
+    errorEl.querySelector('span').textContent = 'Musisz wyrazić zgodę na przetwarzanie danych, aby kontynuować.';
+    errorEl.style.display = 'flex';
+    $('zgoda-rodo').setAttribute('aria-invalid','true');
+    errors.push('Zgoda RODO');
+    if (!firstErrorEl) firstErrorEl = $('zgoda-rodo');
+  } else {
+    $('zgoda-rodo-error').style.display = 'none';
+    $('zgoda-rodo').setAttribute('aria-invalid','false');
+  }
+
+  // Usuń duplikaty
+  errors = [...new Set(errors)];
+
+  if (errors.length > 0) {
+    // APG: pokaż globalny alert + przesuń fokus
+    const errBanner = $('global-error');
+    errBanner.style.display = 'flex';
+    $('global-error-list').textContent =
+      'Popraw następujące pola: ' + errors.join(', ') + '.';
+    errBanner.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    // APG: fokus na pierwszy błąd
+    setTimeout(() => {
+      if (firstErrorEl) firstErrorEl.focus();
+    }, 400);
+    // APG: ogłoszenie przez aria-live (assertive = natychmiast)
+    announce(`Formularz zawiera ${errors.length} ${errors.length === 1 ? 'błąd' : 'błędy'}. Popraw: ${errors.join(', ')}.`, 'assertive');
+    return;
+  }
+
+  // ── Sukces ──────────────────────────────────
+  // APG: aria-busy podczas przetwarzania
+  const btn = $('btn-submit');
+  btn.setAttribute('aria-busy', 'true');
+  btn.textContent = 'Przetwarzanie…';
+  $('global-error').style.display = 'none';
+  announce('Trwa przetwarzanie rejestracji…');
+
+  setTimeout(() => {
+    // Generuj numer zgłoszenia
+    const nr = 'SZK-' + Date.now().toString(36).toUpperCase().slice(-6);
+    $('registration-number').textContent = nr;
+
+    const imie     = $('imie').value.trim();
+    const nazwisko = $('nazwisko').value.trim();
+    const email    = $('email').value.trim();
+    const modulSel = $('modul').options[$('modul').selectedIndex].text;
+    const formaVal = document.querySelector('[name="forma"]:checked').value;
+    const dataVal  = $('data-szkolenia').value;
+
+    $('success-summary').innerHTML =
+      `<strong>Uczestnik:</strong> ${imie} ${nazwisko}<br>` +
+      `<strong>E-mail:</strong> ${email}<br>` +
+      `<strong>Moduł:</strong> ${modulSel}<br>` +
+      `<strong>Forma:</strong> ${formaVal}<br>` +
+      `<strong>Data:</strong> ${dataVal}`;
+
+    // APG: ukryj formularz, pokaż potwierdzenie, przesuń fokus
+    $('form-wrapper').style.display = 'none';
+    const sp = $('success-panel');
+    sp.style.display = 'block';
+    sp.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+    // APG: fokus na nagłówek sukcesu (tabindex="-1" umożliwia focus())
+    setTimeout(() => {
+      $('success-heading').focus();
+      announce('Rejestracja zakończona pomyślnie. Numer zgłoszenia: ' + nr, 'polite');
+    }, 300);
+
+    btn.removeAttribute('aria-busy');
+  }, 1200);
+});
+
+// ══════════════════════════════════════════════════════════
+// DIALOG MODAL — APG: Dialog (Modal) Pattern
+// Focus trap + Escape + powrót fokusa do triggera
+// ══════════════════════════════════════════════════════════
+const backdrop   = $('modal-polityka');
+const modalInner = $('modal-inner');
+const btnOpen    = $('btn-polityka');
+const btnClose   = $('modal-close-btn');
+const btnCancel  = $('modal-cancel-btn');
+const btnAccept  = $('modal-accept-btn');
+let triggerEl    = null;
+
+// APG: focusable elements wewnątrz dialogu
+function getFocusable(container) {
+  return [...container.querySelectorAll(
+    'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+  )].filter(el => !el.disabled && !el.closest('[hidden]'));
+}
+
+function openModal() {
+  triggerEl = document.activeElement;
+  backdrop.classList.add('is-open');
+  backdrop.setAttribute('aria-hidden', 'false');
+  backdrop.removeAttribute('hidden');
+  // APG: fokus na pierwszy fokusable element w dialogu
+  setTimeout(() => { btnClose.focus(); }, 100);
+  announce('Otwarto okno dialogowe: Polityka marketingowa');
+  // APG: zablokuj scroll tła
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+  backdrop.classList.remove('is-open');
+  backdrop.setAttribute('aria-hidden', 'true');
+  document.body.style.overflow = '';
+  // APG: fokus wraca do triggera
+  if (triggerEl) setTimeout(() => triggerEl.focus(), 100);
+  announce('Zamknięto okno dialogowe');
+}
+
+btnOpen.addEventListener('click', openModal);
+btnClose.addEventListener('click', closeModal);
+btnCancel.addEventListener('click', closeModal);
+btnAccept.addEventListener('click', () => {
+  $('zgoda-marketing').checked = true;
+  closeModal();
+  announce('Zgoda marketingowa zaznaczona.');
+});
+
+// APG: Escape zamyka dialog
+document.addEventListener('keydown', e => {
+  if (!backdrop.classList.contains('is-open')) return;
+  if (e.key === 'Escape') { closeModal(); return; }
+  // APG: Focus trap — Tab i Shift+Tab krążą w dialogu
+  if (e.key === 'Tab') {
+    const focusable = getFocusable(modalInner);
+    const first = focusable[0];
+    const last  = focusable[focusable.length - 1];
+    if (e.shiftKey) {
+      if (document.activeElement === first) { e.preventDefault(); last.focus(); }
+    } else {
+      if (document.activeElement === last) { e.preventDefault(); first.focus(); }
+    }
+  }
+});
+
+// Klik w tło zamyka modal (APG: opcjonalne, ale wygodne)
+backdrop.addEventListener('click', e => {
+  if (e.target === backdrop) closeModal();
+});
+
+// APG: inicjalnie dialog jest ukryty dla AT
+backdrop.setAttribute('aria-hidden', 'true');
+</script>
+
+</body>
+</html>
