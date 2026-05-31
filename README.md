@@ -5,7 +5,7 @@ zgodne z WAI-ARIA Authoring Practices Guide (W3C).
 
 ## Zawartość
 
-- '[https://github.com/TyperWiktoria/Aria/blob/0d661b5b74dfdeceb9494dc35d5c778d74ddd497/aria-formularz.html]' — działający formularz z pełną implementacją ARIA APG
+- [aria-formularz.html](https://github.com/TyperWiktoria/Aria/blob/0d661b5b74dfdeceb9494dc35d5c778d74ddd497/aria-formularz.html) — działający formularz z pełną implementacją ARIA APG
 - `aria-raport.txt` — raport z analizy implementacji
 
 ## Zastosowane wzorce ARIA APG
